@@ -122,7 +122,7 @@ jobs:
     <<: *defaults
     environment:
       N_THREADS: 2
-      MEM: 4
+      MEM: 3
     resource_class: medium
     steps:
       - attach_workspace:
@@ -136,7 +136,7 @@ jobs:
           name: test assembly
           command: |
               source activate ./atlasenv
-              .test/test_assembly.sh --resources mem=$MEM java_mem=$MEM --config  threads=$N_THREADS mem=$MEM --jobs=$N_THREADS --restart-times=2 --omit-from build_qc_report build_assembly_report
+              .test/test_assembly.sh --resources mem=$MEM java_mem=$MEM --jobs=$N_THREADS --restart-times=2 --omit-from build_qc_report build_assembly_report
       # - store_test_results:
       #     path: .test/Test_assembly/reports
       # - store_artifacts:

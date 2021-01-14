@@ -129,7 +129,7 @@ def run_workflow(workflow, working_dir,config_file, jobs, profile, dryrun, snake
         "snakemake --snakefile {snakefile} --directory {working_dir} "
         "{jobs} --rerun-incomplete "
         "--configfile '{config_file}' --nolock "
-        " {profile} --use-conda {conda_prefix} {dryrun} "
+        " {profile} --use-conda {conda_prefix} {dryrun} --conda-frontend mamba "
         " {target_rule} "
         " {args} "
     ).format(

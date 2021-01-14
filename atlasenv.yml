@@ -3,10 +3,11 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - python=3.6
-  - snakemake=5.9.1
-  - pandas<1 # needs to be < 0.24 otherwise series are printed with header
-  - bbmap=37.78
+  - python=3.7
+  - mamba
+  - snakemake>=5.30, <6
+  - pandas>1, <2
+  - bbmap
   - click=7
   - ruamel.yaml=0.15.99 # needs to be explicit
   - biopython=1.74

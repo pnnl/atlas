@@ -334,31 +334,12 @@ rule align_reads_to_MAGs:
             2> {log}
         """
 
-ruleorder: bam_2_sam_MAGs > align_reads_to_MAGs
-rule bam_2_sam_MAGs:
-    input:
-        "genomes/alignments/{sample}.bam"
-    output:
-        temp("genomes/alignments/{sample}.sam")
-    threads:
-        config['threads']
-    resources:
-        mem = config["mem"],
-    shadow:
-        "shallow"
-    conda:
-        "%s/required_packages.yaml" % CONDAENV
-    shell:
-        """
-        reformat.sh in={input} out={output} sam=1.3
-        """
 
 
 
 rule pileup_MAGs:
     input:
         sam = "genomes/alignments/{sample}.sam",
-        #bam = "genomes/alignments/{sample}.bam" # to store it
     output:
         basecov = temp("genomes/alignments/{sample}_base_coverage.txt.gz"),
         covhist = temp("genomes/alignments/{sample}_coverage_histogram.txt"),
