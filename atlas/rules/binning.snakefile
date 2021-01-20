@@ -502,7 +502,7 @@ rule get_unique_bin_ids:
     shell:
         "cp {input} {output}"
 
-
+ruleorder: run_das_tool > get_unique_cluster_attribution
 rule run_das_tool:
     input:
         cluster_attribution = expand("{{sample}}/binning/DASTool/{binner}.scaffolds2bin",

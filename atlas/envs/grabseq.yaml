@@ -1,0 +1,7 @@
+channels:
+  - louiejtaylor
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - grabseqs
