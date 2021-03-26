@@ -275,7 +275,7 @@ def make_default_config():
                     "default":5,
                     "assembly":24,
                     "long":12,
-                    "simple_job":0.5
+                    "simple_job": 1
                     }
 
     # conf["diamond_run_mode"] = "fast"

@@ -197,7 +197,7 @@ include: "rules/assemble.snakefile"
 include: "rules/binning.snakefile"
 include: "rules/genomes.smk"
 include: "rules/genecatalog.snakefile"
-include: "rules/cat_taxonomy.smk"
+include: "rules/sra.smk"
 include: "rules/gtdbtk.smk"
 
 

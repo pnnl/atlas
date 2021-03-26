@@ -64,6 +64,7 @@ if  SKIP_QC & (len(MULTIFILE_FRACTIONS)<3):
                 addslash=t \
                 trimreaddescription=t \
                 threads={threads} \
+                pigz=t unpigz=t \
                 -Xmx{resources.java_mem}G 2> {log}
             """
 
@@ -171,6 +172,7 @@ rule error_correction:
             {params.outputs} \
             mode=correct \
             threads={threads} \
+            pigz=t unpigz=t \
             ecc=t ecco=t 2>> {log}
         """
 
@@ -206,6 +208,7 @@ rule merge_pairs:
             outmerged={output[2]} \
             outu={output[0]} outu2={output[1]} \
             {params.flags} k={params.kmer} \
+            pigz=t unpigz=t \
             extend2={params.extend2} 2> {log}
         """
 localrules: passtrough_se_merged
@@ -513,6 +516,7 @@ if config['filter_contigs']:
                 saa=f \
                 append=t \
                 machineout=t \
+                unpigz=t \
                 maxsites={params.maxsites} \
                 -Xmx{resources.java_mem}G 2> {log}
             """
@@ -657,6 +661,7 @@ rule align_reads_to_final_contigs:
             secondary=t \
             saa=f \
             maxsites={params.maxsites} \
+            unpigz=t \
             -Xmx{resources.java_mem}G \
             2> {log}
         """

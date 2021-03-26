@@ -330,6 +330,7 @@ rule align_reads_to_MAGs:
             secondary=t \
             saa=f \
             maxsites={params.maxsites} \
+            pigz=t unpigz=t \
             -Xmx{resources.java_mem}G \
             2> {log}
         """
