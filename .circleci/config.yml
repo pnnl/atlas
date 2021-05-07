@@ -76,8 +76,10 @@ jobs:
       - run: tar -cf conda_envs.tar atlas/envs
       - restore_cache:
           keys:
-            - conda-environements-{{ checksum "conda_envs.tar"  }}
+            - requirements-{{ checksum "conda_envs.tar"  }}
+            - requirements-
             - conda-environements-
+
       - run:
           name: Init
           command: |
@@ -88,15 +90,15 @@ jobs:
           command: |
               source activate ./atlasenv
               atlas run all -w .test/Getenvs --create-envs-only --omit-from build_qc_report build_assembly_report build_bin_report
+      - run:
+          name: download checkm data
+          command: |
+              source activate ./atlasenv
+              atlas run None -w .test/Getenvs logs/checkm_init.txt
       - save_cache:
-          key: conda-environements-{{ checksum "conda_envs.tar"  }}
+          key: requirements-{{ checksum "conda_envs.tar"  }}
           paths:
             - databases
-      # - run:
-      #     name: download checkm data
-      #     command: |
-      #         source activate ./atlasenv
-      #         atlas run None -w .test/Getenvs logs/checkm_init.txt
 
       - persist_to_workspace:
           root: /root/project/
@@ -109,9 +111,6 @@ jobs:
     environment:
     resource_class: small
     steps:
-      - attach_workspace:
-          at: /root/project/
-
       - run: git clone https://github.com/metagenome-atlas/example_data.git
       - persist_to_workspace:
           root: /root/project
@@ -130,7 +129,8 @@ jobs:
       - run: tar -cf conda_envs.tar atlas/envs
       - restore_cache:
           keys:
-            - conda-environements-{{ checksum "conda_envs.tar"  }}
+            - requirements-{{ checksum "conda_envs.tar"  }}
+            - requirements-
             - conda-environements-
       - run:
           name: test assembly
@@ -161,11 +161,22 @@ jobs:
               source activate ./atlasenv
               WD='.test/Test_assembly'
               atlas run None "Genecatalog/clustering/orf2gene.tsv.gz" -w $WD --resources mem=$MEM java_mem=$MEM --jobs=$N_THREADS --restart-times=2
+      - store_test_results:
+          path: .test/Test_assembly
+      - store_artifacts:
+          path: .test/Test_assembly
+          destination: assembly_results
+
   binning:
     <<: *defaults
     environment:
       N_THREADS: 2
       MEM: 4
+      databaseDir: "databases"
+      WD: 'example_data/binning'
+      reads_dir: "example_data/reads/test"
+      config: "--config mem=4 java_mem=4 --resources mem=4 java_mem=4 --jobs=2"
+
     resource_class: medium
     steps:
       - attach_workspace:
@@ -173,17 +184,90 @@ jobs:
       - run: tar -cf conda_envs.tar atlas/envs
       - restore_cache:
           keys:
-            - conda-environements-{{ checksum "conda_envs.tar"  }}
+            - requirements-{{ checksum "conda_envs.tar"  }}
+            - requirements-
             - conda-environements-
+
       - run:
-          name: test binning
+          name: init
           command: |
-              source activate ./atlasenv
-              .test/test_binning.sh --resources mem=$MEM java_mem=$MEM --jobs=$N_THREADS --restart-times=2 --omit-from get_bins
+            source activate ./atlasenv
+            atlas init --db-dir $databaseDir --threads $N_THREADS  -w $WD --skip-qc --interleaved-fastq $reads_dir
+
+            touch -m $WD/finished_assembly
+            touch -m $WD/sample*/*/*.bam # update timestamp of sam files
+      - restore_cache:
+          keys:
+            - binning-{{ .Branch }}
+            - binning-
+      - run:
+          name: assembly
+          command: |
+            source activate ./atlasenv
+            atlas run assembly $config -w $WD
+      - save_cache:
+          key: binning-{{ .Branch }}-assembly
+          paths:
+            - example_data/binning
+      - run:
+          name: until checkm
+          command: |
+            source activate ./atlasenv
+            atlas run binning --omit-from run_checkm_lineage_wf $config -w $WD
+      - run:
+          name: Copy checkm files
+          command: |
+            for s in sample1 sample2 ;
+            do
+              dest_dir=$WD/$s/binning/DASTool/checkm/
+              rm -rf dest_dir
+              mkdir -p $dest_dir
+              cp -r $WD/checkm_results/$s/* $dest_dir
+            done
+      - save_cache:
+          key: binning-{{ .Branch }}-binning
+          paths:
+            - example_data/binning
+
+      - run:
+          name: finish binning
+          command: |
+            source activate ./atlasenv
+            atlas run binning $config -w $WD $@
+      - save_cache:
+          key: binning-{{ .Branch }}-binreport
+          paths:
+            - example_data/binning
+      - run:
+          name: test genomes
+          command: |
+            source activate ./atlasenv
+            rm -r $WD/genomes #start fresh as bin names are not teterministic
+            atlas run None genomes/clustering/allbins2genome.tsv $config -w $WD
+      - save_cache:
+          key: binning-{{ .Branch }}-genomes
+          paths:
+            - example_data/binning
+      - run:
+          name: test genecatalog
+          command: |
+            source activate ./atlasenv
+            atlas run None "Genecatalog/clustering/orf2gene.tsv.gz" $config -w $WD
+
+      - save_cache:
+          key: binning-{{ .Branch }}-Genecatalog
+          paths:
+            - example_data/binning
+      - run:
+          name: test all
+          command: |
+            source activate ./atlasenv
+            atlas run None gene2genome $config -w $WD
+
       - store_test_results:
-          path: example_data/binning/reports
+          path: example_data/binning
       - store_artifacts:
-          path: example_data/binning/reports
+          path: example_data/binning
           destination: binning_results
 
   #
