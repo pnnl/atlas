@@ -54,4 +54,4 @@ done
 
 atlas init --db-dir $databaseDir --skip-qc --interleaved-fastq -w $WD3 $reads_dir
 
-atlas run assembly --config  threads=2 mem=4 java_mem=4 -w $WD3 $@
+atlas run assembly --config  threads=2 mem=4 java_mem=4 normalize_reads_before_assembly=true -w $WD3 $@
