@@ -1,0 +1,10 @@
+channels:
+    - conda-forge
+    - bioconda
+    - pytorch
+    - defaults
+dependencies:
+    - pytorch
+    - torchvision
+    - cudatoolkit=10.2
+    - vamb

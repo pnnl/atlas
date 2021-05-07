@@ -199,6 +199,7 @@ include: "rules/genomes.smk"
 include: "rules/genecatalog.snakefile"
 include: "rules/cat_taxonomy.smk"
 include: "rules/gtdbtk.smk"
+include: "rules/crossbining.smk"
 
 
 

@@ -1,0 +1,6 @@
+name: minimap2
+channels:
+  - bioconda
+dependencies:
+  - minimap2
+  - samtools
